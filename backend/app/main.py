@@ -48,22 +48,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Feedback persistence now backed by SQLite (see app/feedback_store.py, Week 6).
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pathlib import Path
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+)
 
-app = FastAPI()
-
-STATIC_DIR = Path(__file__).parent / "static"
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 @app.get("/")
 async def root():
-    return FileResponse(STATIC_DIR / "index.html")
+    return FileResponse(
+        os.path.join(FRONTEND_DIR, "index.html")
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -208,7 +207,7 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 app.mount("/frontend", StaticFiles(directory=FRONTEND_DIR), name="frontend")
 
 @app.get("/{catchall:path}")
-async def serve_frontend():
+async def serve_frontend(catchall: str):
     index_path = os.path.join(FRONTEND_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
