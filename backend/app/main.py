@@ -49,8 +49,21 @@ app.add_middleware(
 )
 
 # Feedback persistence now backed by SQLite (see app/feedback_store.py, Week 6).
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+app = FastAPI()
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+@app.get("/")
+async def root():
+    return FileResponse(STATIC_DIR / "index.html")
 @app.get("/health")
 def health():
     return {"status": "ok"}
